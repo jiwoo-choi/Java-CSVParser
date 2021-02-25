@@ -21,13 +21,41 @@ import com.csvparser.interfaces.FileRedable;
 public class AnnotationCSVParser implements FileRedable {
 
 
+	private static java.util.function.Function<String, Object> typeToMapper(Class<?> type) {
+		
+		if (type.isAssignableFrom(Integer.class)) {
+			return Integer::parseInt;
+		} else if (type.isAssignableFrom(int.class)) {
+			return Integer::parseInt;
+		} else if (type.isAssignableFrom(String.class)) {
+			return (String s) -> s;
+		} else if (type.isAssignableFrom(Long.class)) {
+			return Long::parseLong;
+		} else if (type.isAssignableFrom(long.class)) {
+			return Long::parseLong;
+		} else if (type.isAssignableFrom(Double.class)) {
+			return Double::parseDouble;
+		} else if (type.isAssignableFrom(double.class)) {
+			return Double::parseDouble;
+		} else if (type.isAssignableFrom(Float.class)) {
+			return Float::parseFloat;
+		} else if (type.isAssignableFrom(float.class)) {
+			return Float::parseFloat;
+		} else if (type.isAssignableFrom(Character.class)) {
+			return (String s) -> s.charAt(0);
+		} else if (type.isAssignableFrom(char.class)) {
+			return (String s) -> s.charAt(0);
+		} else {
+			// error or string.
+			return (String s) -> s;
+		}		
+	}
 	public static <T> List<T> parse(String path, String delimiter, Class<T> object) {
 
 		HashMap<String, String> columToField = new HashMap<>();
 		
-		// TODO : 바꿔주기. (하나의 function으로 바꿔주기)  ENum
-		// 필드에 적합한 타입으로 바꿔주는 mapper를 담아줌 field : mapper
-		HashMap<String, java.util.function.Function<String, Object>> fieldToMapper = new HashMap<>();
+		// TODO : 바꿔주기. (하나의 function으로 바꿔주기)  ENum??
+		
 		// 필드에 적합한 타입으로 바꿔주는 mapper를 담아 field : class<?>
 		HashMap<String, Class<?>> fieldToType = new HashMap<>();
 
@@ -44,41 +72,29 @@ public class AnnotationCSVParser implements FileRedable {
 				Class<?> type = f.getType();
 				
 				if (type.isAssignableFrom(Integer.class)) {
-					fieldToMapper.put(f.getName(), Integer::parseInt);
 					fieldToType.put(f.getName(), Integer.class);
 				} else if (type.isAssignableFrom(int.class)) {
-					fieldToMapper.put(f.getName(), Integer::parseInt);
 					fieldToType.put(f.getName(), int.class);
 				} else if (type.isAssignableFrom(String.class)) {
-					fieldToMapper.put(f.getName(), (String s) -> s);
 					fieldToType.put(f.getName(), String.class);
 				} else if (type.isAssignableFrom(Long.class)) {
-					fieldToMapper.put(f.getName(), Long::parseLong);
 					fieldToType.put(f.getName(), Long.class);
 				} else if (type.isAssignableFrom(long.class)) {
-					fieldToMapper.put(f.getName(), Long::parseLong);
 					fieldToType.put(f.getName(), long.class);
 				} else if (type.isAssignableFrom(Double.class)) {
-					fieldToMapper.put(f.getName(), Double::parseDouble);
 					fieldToType.put(f.getName(), Double.class);
 				} else if (type.isAssignableFrom(double.class)) {
-					fieldToMapper.put(f.getName(), Double::parseDouble);
 					fieldToType.put(f.getName(), double.class);
 				} else if (type.isAssignableFrom(Float.class)) {
-					fieldToMapper.put(f.getName(), Float::parseFloat);
 					fieldToType.put(f.getName(), Float.class);
 				} else if (type.isAssignableFrom(float.class)) {
-					fieldToMapper.put(f.getName(), Float::parseFloat);
 					fieldToType.put(f.getName(), float.class);
 				} else if (type.isAssignableFrom(Character.class)) {
-					fieldToMapper.put(f.getName(), (String s) -> s.charAt(0));
 					fieldToType.put(f.getName(), Character.class);
 				} else if (type.isAssignableFrom(char.class)) {
-					fieldToMapper.put(f.getName(), (String s) -> s.charAt(0));
 					fieldToType.put(f.getName(), char.class);
 				} else {
 					// error or string.
-					fieldToMapper.put(f.getName(), (String s) -> s);
 					fieldToType.put(f.getName(), String.class);
 				}
 				
@@ -125,16 +141,17 @@ public class AnnotationCSVParser implements FileRedable {
 				for (int j = 0 ; j < size; j++) {
 					if (reverseMap[j] != null) {
 						
-						System.out.println(list.get(i).get(j));
 						Method setter = object.getDeclaredMethod("set" + reverseMap[j], fieldToType.get(reverseFieldMap[j]));
-						setter.invoke(instance, fieldToMapper.get(reverseFieldMap[j]).apply(list.get(i).get(j)));
+						setter.invoke(instance,typeToMapper(fieldToType.get(reverseFieldMap[j])).apply(list.get(i).get(j)));
+//								;
 						//field의 값을 변경하면 될까?
 						//근데 어떤 field일지모름.. 그냥 이방법이 제일 빠를듯?
 						// (!) class의 모든 field리스트를 살펴서 직접 넣어주는 방법.
 						// (@) 그냥 네이밍 규칙을 찾아 set을 바로 불러주는 방법.
 						//						Method setter = instance.getClass().getDeclaredMethod("set" + reverseMap[j]);
 						//						setter.invoke(instance, list.get(i).get(j));
-
+						//						returnList.add((T) instance);
+//						return returnList;
 					}
 				}
 				returnList.add((T) instance);
