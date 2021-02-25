@@ -41,12 +41,6 @@ TestDTO [code=17163098, name=도전최강달인왕만두, businessName=안녕하
 **TestDTO.java**
 
 ```
-@Column("상가업소번호")
-private int code;
-
-@Column("상호명")
-private String name;
-
 public class TestDTO {
 
 
