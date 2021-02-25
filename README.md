@@ -22,15 +22,16 @@ List<T> list = AnnotationCSVParser.parse(path, delimiter, object);
 **Main.java**
 ```
 // 파싱하기.
-List<TestDTO> dto = AnnotationCSVParser.parse("res/enviroment_jongro.csv",",", TestDTO.class);
+List<TestDTO> dtos = AnnotationCSVParser.parse("res/enviroment_jongro.csv",",", TestDTO.class);
 
 // 리스트출력
-System.out.println(dto.get(0).getBusinessName() + " " + dto.get(0).getCode());
+dtos.stream().forEach(System.out::println);
 ```
 
 **TestDTO.java**
 
 ```
+
 public class TestDTO {
 
 	@Column(value="\"업체(시설)명\"")
@@ -39,13 +40,28 @@ public class TestDTO {
 	@Column(value="\"인허가번호\"")
 	private String code;
 
+	@Column("\"점검사항\"")
+	private String checkList;
 	
+	public String getCheckList() {
+		return checkList;
+	}
+
+	public void setCheckList(String checkList) {
+		this.checkList = checkList;
+	}
+
 	public String getBusinessName() {
 		return businessName;
 	}
 
 	public void setBusinessName(String businessName) {
 		this.businessName = businessName;
+	}
+
+	@Override
+	public String toString() {
+		return "TestDTO [businessName=" + businessName + ", code=" + code + ", checkList=" + checkList + "]";
 	}
 
 	public String getCode() {
@@ -55,6 +71,8 @@ public class TestDTO {
 	public void setCode(String code) {
 		this.code = code;
 	}
+
+	
 }
 ```
 - `@Column`에 원하는 각 필드에 해당하는 컬럼명을 입력하면, 컬럼에 해당하는 값을 DTO 객체에 주입시켜줍니다.
