@@ -22,40 +22,65 @@ List<T> list = AnnotationCSVParser.parse(path, delimiter, object);
 **Main.java**
 ```
 // 파싱하기.
-List<TestDTO> dtos = AnnotationCSVParser.parse("res/enviroment_jongro.csv",",", TestDTO.class);
+List<TestDTO> dtos = AnnotationCSVParser.parse("res/sanga_seoul.csv","\\|", TestDTO.class);
 
 // 리스트출력
 dtos.stream().forEach(System.out::println);
 
 // result
-TestDTO [businessName="XXXXX", code="3000...", checkList="폐수배출시설 및 방지시설 정상가동 여부"]
-TestDTO [businessName="XXXXX", code="3000...", checkList="폐수배출시설 및 방지시설 정상가동 여부"]
-TestDTO [businessName="XXXXX", code="3000...", checkList="폐수배출시설 및 방지시설 정상가동 여부"]
-TestDTO [businessName="XXXXX", code="3000...", checkList="폐수배출시설 및 방지시설 정상가동 여부"]
+TestDTO [code=17163092, name=도전최강달인왕만두, businessName=안녕하세, test=N]
+TestDTO [code=17163093, name=도전최강달인왕만두, businessName=안녕하세, test=Y]
+TestDTO [code=17163094, name=도전최강달인왕만두, businessName=안녕하세, test=N]
+TestDTO [code=17163095, name=도전최강달인왕만두, businessName=안녕하세, test=N]
+TestDTO [code=17163096, name=도전최강달인왕만두, businessName=안녕하세, test=N]
+TestDTO [code=17163097, name=도전최강달인왕만두, businessName=안녕하세, test=N]
+TestDTO [code=17163098, name=도전최강달인왕만두, businessName=안녕하세, test=N]
 ...
 ```
 
 **TestDTO.java**
 
 ```
+@Column("상가업소번호")
+private int code;
+
+@Column("상호명")
+private String name;
 
 public class TestDTO {
 
-	@Column(value="\"업체(시설)명\"")
+
+	@Column("상가업소번호")
+	private int code;
+
+	@Column("상호명")
+	private String name;
+	
+	@Column("지점명")
 	private String businessName;
 
-	@Column(value="\"인허가번호\"")
-	private String code;
+	@Column("Test")
+	private char test;
 
-	@Column("\"점검사항\"")
-	private String checkList;
-	
-	public String getCheckList() {
-		return checkList;
+	@Override
+	public String toString() {
+		return "TestDTO [code=" + code + ", name=" + name + ", businessName=" + businessName + ", test=" + test + "]";
 	}
 
-	public void setCheckList(String checkList) {
-		this.checkList = checkList;
+	public int getCode() {
+		return code;
+	}
+
+	public void setCode(int code) {
+		this.code = code;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getBusinessName() {
@@ -66,20 +91,13 @@ public class TestDTO {
 		this.businessName = businessName;
 	}
 
-	@Override
-	public String toString() {
-		return "TestDTO [businessName=" + businessName + ", code=" + code + ", checkList=" + checkList + "]";
+	public char getTest() {
+		return test;
 	}
 
-	public String getCode() {
-		return code;
+	public void setTest(char test) {
+		this.test = test;
 	}
-
-	public void setCode(String code) {
-		this.code = code;
-	}
-
-	
 }
 ```
 - `@Column`에 원하는 각 필드에 해당하는 컬럼명을 입력하면, 컬럼에 해당하는 값을 DTO 객체에 주입시켜줍니다.
