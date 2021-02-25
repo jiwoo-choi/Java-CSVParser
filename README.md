@@ -26,6 +26,13 @@ List<TestDTO> dtos = AnnotationCSVParser.parse("res/enviroment_jongro.csv",",", 
 
 // 리스트출력
 dtos.stream().forEach(System.out::println);
+
+// result
+TestDTO [businessName="XXXXX", code="3000...", checkList="폐수배출시설 및 방지시설 정상가동 여부"]
+TestDTO [businessName="XXXXX", code="3000...", checkList="폐수배출시설 및 방지시설 정상가동 여부"]
+TestDTO [businessName="XXXXX", code="3000...", checkList="폐수배출시설 및 방지시설 정상가동 여부"]
+TestDTO [businessName="XXXXX", code="3000...", checkList="폐수배출시설 및 방지시설 정상가동 여부"]
+...
 ```
 
 **TestDTO.java**
