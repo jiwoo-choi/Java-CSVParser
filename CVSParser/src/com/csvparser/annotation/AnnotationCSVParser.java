@@ -60,7 +60,7 @@ public class AnnotationCSVParser implements FileRedable {
 		List<T> returnList = new ArrayList<>();
 
 
-		for(int i = 1 ; i < size; i++) {
+		for(int i = 1 ; i < list.size(); i++) {
 			try {
 				Object instance = object.newInstance();
 

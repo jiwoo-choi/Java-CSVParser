@@ -10,12 +10,28 @@ public class TestDTO {
 	@Column(value="\"인허가번호\"")
 	private String code;
 
+	@Column("\"점검사항\"")
+	private String checkList;
+	
+	public String getCheckList() {
+		return checkList;
+	}
+
+	public void setCheckList(String checkList) {
+		this.checkList = checkList;
+	}
+
 	public String getBusinessName() {
 		return businessName;
 	}
 
 	public void setBusinessName(String businessName) {
 		this.businessName = businessName;
+	}
+
+	@Override
+	public String toString() {
+		return "TestDTO [businessName=" + businessName + ", code=" + code + ", checkList=" + checkList + "]";
 	}
 
 	public String getCode() {
