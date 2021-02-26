@@ -114,16 +114,26 @@ void startRow()
 ```
 void endRow();
 ```
+모든 컬럼이 끝나고 다음 row로 넘어가기 전에, 이 메소드가 불립니다.
+
 
 ```
 void getValue(String columnName, int position, String data);
 ```
- 
+각 column의 이름, 위치 정보, 그리고 데이터 이 세가지가 파라미터로 들어와서 불립니다.
+
 ```
 void getValue(int position, String data);
 ```
+위치 정보, 그리고 데이터 이 세가지가 파라미터로 들어와서 불립니다.
 
 
+## CSVParserHelper.parse()
+실제로 parse를 담당하는 부분입니다.
+
+```
+cp.parse("res/sanga_seoul.csv", "\\|", handler);
+```
 
 
 ### Parameters
@@ -131,7 +141,7 @@ void getValue(int position, String data);
 |:-:|:-:|:-:|
 |  path |  string | csv 파일 path string  |
 |  delimiter |  string | csv 파일 구분자  |
-|  object |  Class\<T> | 만들 객체의 타입  |
+|  handler |  Parsable | Parsable을 상속받은 객체  |
 
 
 
