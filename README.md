@@ -99,7 +99,43 @@ public class TestDTO {
 
 
 
-## visitor패턴 방식 (SAXParser)
+## visitor패턴 Parser
+
+`com.csvparser.visitor`에 있는 `Parsable.java`를 implements 합니다.
+아래 4개의 메소드가 제공됩니다.
+
+### Methods
+```
+void startRow()
+```
+새로운 row 가 시작될 때, 이 메소드가 불립니다.
+
+
+```
+void endRow();
+```
+
+```
+void getValue(String columnName, int position, String data);
+```
+ 
+```
+void getValue(int position, String data);
+```
+
+
+
+
+### Parameters
+|  name | type  |  description |
+|:-:|:-:|:-:|
+|  path |  string | csv 파일 path string  |
+|  delimiter |  string | csv 파일 구분자  |
+|  object |  Class\<T> | 만들 객체의 타입  |
+
+
+
+
 
 ## Thread & Parallel 방식
 
