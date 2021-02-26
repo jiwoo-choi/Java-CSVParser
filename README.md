@@ -95,9 +95,6 @@ public class TestDTO {
 }
 ```
 - `@Column`에 원하는 각 필드에 해당하는 컬럼명을 입력하면, 컬럼에 해당하는 값을 DTO 객체에 주입시켜줍니다.
-- getter와 setter가 네이밍 컨벤션에 맞게 구현이 되어있어야 합니다. 
-
-
 
 ## visitor패턴 Parser
 
