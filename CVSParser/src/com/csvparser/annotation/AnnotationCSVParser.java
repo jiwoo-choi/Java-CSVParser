@@ -16,8 +16,6 @@ import com.csvparser.interfaces.FileRedable;
  * @author jiwoochoi
  *
  */
-
-
 public class AnnotationCSVParser implements FileRedable {
 
 
@@ -50,87 +48,56 @@ public class AnnotationCSVParser implements FileRedable {
 			return (String s) -> s;
 		}		
 	}
+	
 	public static <T> List<T> parse(String path, String delimiter, Class<T> object) {
 
-		HashMap<String, String> columToField = new HashMap<>();
 		
 		// TODO : 바꿔주기. (하나의 function으로 바꿔주기)  ENum??
 		
-		// 필드에 적합한 타입으로 바꿔주는 mapper를 담아 field : class<?>
-		HashMap<String, Class<?>> fieldToType = new HashMap<>();
 
-		HashMap<String, Integer> map = new HashMap<>();
-
+		/// (dto) column name과 field객체의 1:1 맵핑.
+		HashMap<String, Field> columnNameToField = new HashMap<>();
+		/// (dto) column name과 실제 csv 데이터의 position mapping
+		HashMap<String, Integer> columNameToPosition = new HashMap<>();
+		/// (dto) column name들..
+		List<String> columnNames = new ArrayList<String>();
 		
+		/// 주어진 객체를 읽으며 dto에서 정의한 column네임을 모두 수집합니다.
 		for (Field f : object.getDeclaredFields()) {
 			Column column = f.getAnnotation(Column.class);
 			if (column != null) {
-				
-				map.put(column.value(), 0);
-				
-				
-				Class<?> type = f.getType();
-				
-				if (type.isAssignableFrom(Integer.class)) {
-					fieldToType.put(f.getName(), Integer.class);
-				} else if (type.isAssignableFrom(int.class)) {
-					fieldToType.put(f.getName(), int.class);
-				} else if (type.isAssignableFrom(String.class)) {
-					fieldToType.put(f.getName(), String.class);
-				} else if (type.isAssignableFrom(Long.class)) {
-					fieldToType.put(f.getName(), Long.class);
-				} else if (type.isAssignableFrom(long.class)) {
-					fieldToType.put(f.getName(), long.class);
-				} else if (type.isAssignableFrom(Double.class)) {
-					fieldToType.put(f.getName(), Double.class);
-				} else if (type.isAssignableFrom(double.class)) {
-					fieldToType.put(f.getName(), double.class);
-				} else if (type.isAssignableFrom(Float.class)) {
-					fieldToType.put(f.getName(), Float.class);
-				} else if (type.isAssignableFrom(float.class)) {
-					fieldToType.put(f.getName(), float.class);
-				} else if (type.isAssignableFrom(Character.class)) {
-					fieldToType.put(f.getName(), Character.class);
-				} else if (type.isAssignableFrom(char.class)) {
-					fieldToType.put(f.getName(), char.class);
-				} else {
-					// error or string.
-					fieldToType.put(f.getName(), String.class);
-				}
-				
-				/// Column이 실제 필드명으로 뭔지 파악하기 위함.
-				columToField.put(column.value(), f.getName());
+				columnNames.add(column.value());
+				columnNameToField.put(column.value(), f);
+//				Class<?> type = f.getType();
 			}
 		}
 
 				
+		/// csv 파일을 읽습니다.
 		List<List<String>> list = FileRedable.parseToArray(path, delimiter);
 
-//		if (true) return null;
-		Set<String> keyFound = map.keySet();
 
-		// 칼럼을 읽습니다.
+		/// 실제 데이터의 column 사이즈.
 		int size = list.get(0).size();
+		
+		/// TODO : 실제 데이터와 DTO가 다르면 에러를 내야한다.
+		
 		for(int i = 0 ; i < size; i++) {
-			for (String key : keyFound) {
-				if (key.equals(list.get(0).get(i))) {
-					map.put(key, i); // 인덱스정보 저장.
+			for (String name : columnNames) {
+				if (name.equals(list.get(0).get(i))) {
+					columNameToPosition.put(name, i); // 인덱스정보 저장.
 				}
 			}
 		}
+		
+		String[] positionToColumnName = new String[size];
 
-		//Integer, String으로 역방향 map을 만들어줍니다.
-		String[] reverseMap = new String[size];
-		String[] reverseFieldMap = new String[size];
-
-		for (String key : keyFound) {
-			String fieldName = columToField.get(key);
-			Integer index = map.get(key);
-			reverseMap[index] = fieldName.substring(0,1).toUpperCase()+fieldName.substring(1);
-			reverseFieldMap[index] = fieldName;
+		for (String columnName : columNameToPosition.keySet()) {
+			int idx = columNameToPosition.get(columnName);
+			positionToColumnName[idx] = columnName;
 		}
 
-		
+
 		List<T> returnList = new ArrayList<>();
 
 
@@ -139,12 +106,21 @@ public class AnnotationCSVParser implements FileRedable {
 				Object instance = object.newInstance();
 
 				for (int j = 0 ; j < size; j++) {
-					if (reverseMap[j] != null) {
+					if (positionToColumnName[j] != null) {
 						
-						Method setter = object.getDeclaredMethod("set" + reverseMap[j], fieldToType.get(reverseFieldMap[j]));
-						setter.invoke(instance,typeToMapper(fieldToType.get(reverseFieldMap[j])).apply(list.get(i).get(j)));
-//								;
-						//field의 값을 변경하면 될까?
+						Field fieldInfo = columnNameToField.get(positionToColumnName[j]);
+
+						Class<?> type = fieldInfo.getType();
+						fieldInfo.setAccessible(true);
+						fieldInfo.set(instance, typeToMapper(type).apply(list.get(i).get(j)));
+						
+//						String variableName = fieldInfo.getName();
+//						String setterName =  "set" + variableName.substring(0,1).toUpperCase()+variableName.substring(1);
+//						Method setter = object.getDeclaredMethod(setterName,type);
+//						setter.invoke(instance,);
+						//field의 값에다가 직접 set해주기 가능.
+						//field // 필드정보있어서바로가능.
+						// setter사용해주기.
 						//근데 어떤 field일지모름.. 그냥 이방법이 제일 빠를듯?
 						// (!) class의 모든 field리스트를 살펴서 직접 넣어주는 방법.
 						// (@) 그냥 네이밍 규칙을 찾아 set을 바로 불러주는 방법.
@@ -155,13 +131,11 @@ public class AnnotationCSVParser implements FileRedable {
 					}
 				}
 				returnList.add((T) instance);
-			}  catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException e) {
+			}  catch (InstantiationException | IllegalAccessException | SecurityException e) {
 				e.printStackTrace();
 			} catch (IllegalArgumentException e) {
 				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				e.printStackTrace();
-			}
+			} 
 
 		}
 
